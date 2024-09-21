@@ -9,15 +9,28 @@ function renderMessage(message) {
   messagesDiv.appendChild(messageElement);
 }
 
-// Função para salvar as mensagens no localStorage
-function saveMessagesToLocalStorage(messages) {
-  localStorage.setItem("chatMessages", JSON.stringify(messages));
+// Função para renderizar a lista de usuários
+function renderUserList(users) {
+  const usersDiv = document.querySelector(".users"); // Certifique-se de ter um elemento com essa classe no HTML
+  usersDiv.innerHTML = ""; // Limpa a lista atual
+
+  users.forEach((user) => {
+    const userElement = document.createElement("div");
+    userElement.classList.add("user");
+    userElement.textContent = user.username; // Ou use outro campo se você tiver um nome personalizado
+    usersDiv.appendChild(userElement);
+  });
 }
 
-// Função para carregar as mensagens do localStorage e renderizá-las na tela
+// Função para carregar mensagens do localStorage
 function loadMessagesFromLocalStorage() {
   const storedMessages = localStorage.getItem("chatMessages");
   return storedMessages ? JSON.parse(storedMessages) : [];
+}
+
+// Função para salvar mensagens no localStorage
+function saveMessagesToLocalStorage(messages) {
+  localStorage.setItem("chatMessages", JSON.stringify(messages));
 }
 
 // Carregar mensagens salvas ao carregar a página
@@ -43,26 +56,31 @@ document.querySelector("#chat").addEventListener("submit", function (event) {
 
     // Limpa o campo de mensagem após o envio
     messageInput.value = "";
+
+    // Renderiza a mensagem localmente também
+    renderMessage(messageObject);
+
+    // Salva as mensagens no localStorage
+    messages.push(messageObject);
+    saveMessagesToLocalStorage(messages);
   }
 });
 
 // Ouvir a mensagem recebida do servidor e exibi-la
 socket.on("message", (message) => {
-  // Adiciona a mensagem recebida à lista de mensagens
-  messages.push(message);
-
-  // Salva as mensagens no localStorage
-  saveMessagesToLocalStorage(messages);
-
-  // Renderiza a mensagem recebida
   renderMessage(message);
+});
+
+// Ouvir a lista de usuários recebida do servidor e exibi-la
+socket.on("userList", (users) => {
+  renderUserList(users);
 });
 
 // Registrar o Service Worker para transformar em PWA
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () {
     navigator.serviceWorker
-      .register("/service-worker.js") // Certifique-se de que este caminho esteja correto
+      .register("/service-worker.js")
       .then(function (registration) {
         console.log("Service Worker registrado com sucesso:", registration);
       })
