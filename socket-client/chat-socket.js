@@ -58,7 +58,7 @@ document.querySelector("#chat").addEventListener("submit", function (event) {
     messageInput.value = "";
 
     // Renderiza a mensagem localmente também
-    renderMessage(messageObject);
+    // renderMessage(messageObject);
 
     // Salva as mensagens no localStorage
     messages.push(messageObject);
